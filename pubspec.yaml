@@ -51,7 +51,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_native_splash: ^2.4.0
-  icons_launcher: ^3.0.0
+  flutter_launcher_icons: ^0.14.1
   http: ^0.13.4
   path_provider: ^2.0.11
 
@@ -99,3 +99,21 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/playstore.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/playstore.png"
+    background_color: "#eeeeee"
+    theme_color: "#eeeeee"
+  windows:
+    generate: true
+    image_path: "assets/playstore.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/playstore.png"
