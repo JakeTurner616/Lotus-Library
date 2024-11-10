@@ -1,4 +1,4 @@
-package com.example.mtg_json_parser
+package com.example.lotus_library
 
 import io.flutter.embedding.android.FlutterActivity
 

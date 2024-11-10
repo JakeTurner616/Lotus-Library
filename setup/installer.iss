@@ -17,16 +17,16 @@ OutputBaseFilename=LotusLibrary-setup
 OutputDir=output
 Compression=lzma
 SolidCompression=yes
-LicenseFile=C:\Users\jaked\Documents\mtg_json_parser\LICENSE.txt
+LicenseFile=C:\Users\jaked\Documents\lotus_library\LICENSE.txt
 
 ; Specify files to include in the installer
 [Files]
-Source: "C:\Users\jaked\Documents\mtg_json_parser\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "C:\Users\jaked\Documents\lotus_library\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 ; Define the application's main executable to be installed in the Start Menu and desktop
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\mtg_json_parser.exe"
-Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\mtg_json_parser.exe"; Tasks: desktopicon
+Name: "{group}\{#MyAppName}"; Filename: "{app}\lotus_library.exe"
+Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\lotus_library.exe"; Tasks: desktopicon
 
 ; Optional: Add an uninstaller
 [UninstallDelete]
