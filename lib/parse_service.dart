@@ -76,9 +76,11 @@ class CardLoader {
         .where((entry) => (entry['score'] as int) > 0)
         .toList();
 
+    // Sort cards by score in descending order and limit to top 8 results
     relatedCards
         .sort((a, b) => (b['score'] as int).compareTo(a['score'] as int));
     return relatedCards
+        .take(8) // Only take the top 8 results
         .map((entry) => entry['card'] as Map<String, dynamic>)
         .toList();
   }

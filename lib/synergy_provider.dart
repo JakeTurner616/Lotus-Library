@@ -3,7 +3,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 class SynergyProvider {
   static List<Map<String, dynamic>> getSynergies(
-      Map<String, dynamic> cardFace, List<Map<String, dynamic>> allCards) {
+      Map<String, dynamic> cardFace, List<Map<String, dynamic>> allCards,
+      {int maxResults = 8}) {
+    // Added a maxResults parameter
     final targetOracleText = cardFace['oracle_text'] ?? '';
     final targetKeywords = cardFace['keywords'] ?? [];
     final targetColorIdentity = cardFace['color_identity'] ?? [];
@@ -70,12 +72,13 @@ class SynergyProvider {
       };
     }).toList();
 
-    // Sort cards by score in descending order
+    // Sort cards by score in descending order and limit results to maxResults
     relatedCards
         .sort((a, b) => (b['score'] as int).compareTo(a['score'] as int));
 
-    // Return only cards, sorted by their relatability score
+    // Return only top cards up to maxResults
     return relatedCards
+        .take(maxResults)
         .map((entry) => entry['card'] as Map<String, dynamic>)
         .toList();
   }
