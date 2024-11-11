@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart';
+import 'package:archive/archive.dart';
 
 Future<void> downloadAndExtractData(
     ValueNotifier<String> statusNotifier) async {
@@ -228,14 +229,38 @@ Future<void> _downloadScryfallData(
 
 Future<void> _downloadMtgjsonData(
     ValueNotifier<String> statusNotifier, File atomicCardsFile) async {
-  final atomicCardsUrl = 'https://mtgjson.com/api/v5/AtomicCards.json';
+  final atomicCardsZipUrl = 'https://mtgjson.com/api/v5/AtomicCards.json.zip';
+  final directory = await getApplicationSupportDirectory();
+  final zipFilePath = '${directory.path}/AtomicCards.json.zip';
 
-  statusNotifier.value = 'Downloading MTGJSON Atomic Cards...';
-  final response = await http.get(Uri.parse(atomicCardsUrl));
+  statusNotifier.value = 'Downloading MTGJSON Atomic Cards (zipped)...';
+  final response = await http.get(Uri.parse(atomicCardsZipUrl));
 
   if (response.statusCode == 200) {
-    await atomicCardsFile.writeAsBytes(response.bodyBytes);
+    // Save the downloaded zip file
+    final zipFile = File(zipFilePath);
+    await zipFile.writeAsBytes(response.bodyBytes);
+
+    // Extract the zip file
+    statusNotifier.value = 'Extracting MTGJSON Atomic Cards...';
+    final bytes = zipFile.readAsBytesSync();
+    final archive = ZipDecoder().decodeBytes(bytes);
+
+    for (final file in archive) {
+      if (file.isFile && file.name == 'AtomicCards.json') {
+        final output = atomicCardsFile.openWrite();
+        output.add(file.content as List<int>);
+        await output.close();
+        break;
+      }
+    }
+
+    // Delete the zip file after extraction
+    await zipFile.delete();
+
     statusNotifier.value = 'MTGJSON Atomic Cards updated successfully.';
+  } else {
+    statusNotifier.value = 'Failed to download MTGJSON Atomic Cards.';
   }
 }
 

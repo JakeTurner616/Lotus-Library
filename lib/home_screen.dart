@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+
 import 'download_service.dart';
 import 'card_widget.dart';
 import 'skeleton_card.dart';
 import 'saved_lists_screen.dart';
 import 'power_leveler_screen.dart';
-import 'parse_service.dart';
 import 'saved_lists_manager.dart';
 import 'card_search_delegate.dart';
+import 'parse_service.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -23,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> displayedCards = [];
   bool isLoading = true;
   bool isFetchingMore = false;
+  bool dataAvailable = false;
   final List<String> formats = [
     'commander',
     'modern',
@@ -55,8 +57,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _initializeLoader() async {
     try {
       await cardLoader.initialize();
-      cardLoader.applyFilter(selectedFormat);
-      await _loadMoreCards();
+      if (cardLoader.allCardsFiltered.isNotEmpty) {
+        dataAvailable = true;
+        cardLoader.applyFilter(selectedFormat);
+        await _loadMoreCards();
+      }
     } catch (e) {
       progressNotifier.value = "Error: ${e.toString()}";
     } finally {
@@ -87,6 +92,13 @@ class _HomeScreenState extends State<HomeScreen> {
       cardLoader.applyFilter(selectedFormat);
     });
     await _loadMoreCards();
+    setState(() => isLoading = false);
+  }
+
+  Future<void> _startDownload() async {
+    setState(() => isLoading = true);
+    await cardLoader.downloadIfNeeded();
+    await _initializeLoader(); // Reinitialize to load data after download
     setState(() => isLoading = false);
   }
 
@@ -141,20 +153,33 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   itemBuilder: (context, index) => SkeletonCard(),
                 )
-              : GridView.builder(
-                  controller: scrollController,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    childAspectRatio: aspectRatio,
-                    crossAxisSpacing: 3.0, // Horizontal space between cards
-                    mainAxisSpacing: 3.0, // Vertical space between cards
-                  ),
-                  itemCount: displayedCards.length,
-                  itemBuilder: (context, index) => CardWidget(
-                    cardData: displayedCards[index],
-                    cardLoader: cardLoader, // Pass cardLoader here
-                  ),
-                ),
+              : dataAvailable
+                  ? GridView.builder(
+                      controller: scrollController,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        childAspectRatio: aspectRatio,
+                        crossAxisSpacing: 3.0, // Horizontal space between cards
+                        mainAxisSpacing: 3.0, // Vertical space between cards
+                      ),
+                      itemCount: displayedCards.length,
+                      itemBuilder: (context, index) => CardWidget(
+                        cardData: displayedCards[index],
+                        cardLoader: cardLoader, // Pass cardLoader here
+                      ),
+                    )
+                  : Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(progressNotifier.value),
+                          ElevatedButton(
+                            onPressed: _startDownload,
+                            child: Text("Download and Initialize Data"),
+                          ),
+                        ],
+                      ),
+                    ),
         ),
         if (isFetchingMore) Center(child: CircularProgressIndicator()),
       ],

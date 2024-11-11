@@ -83,63 +83,91 @@ class CardLoader {
         .toList();
   }
 
+  Future<void> downloadIfNeeded() async {
+    final directory = await getApplicationSupportDirectory();
+    final scryfallFile = File('${directory.path}/oracle-cards.json');
+    final atomicCardsFile = File('${directory.path}/AtomicCards.json');
+
+    // Check if required files are available, else download
+    if (!await scryfallFile.exists() || !await atomicCardsFile.exists()) {
+      progressNotifier.value =
+          "Data file(s) missing. Downloading required data...";
+      await downloadAndExtractData(progressNotifier);
+    }
+
+    // Open the Scryfall JSON file for streaming after download
+    progressNotifier.value = "Opening JSON file for streaming...";
+    _fileStream = scryfallFile.openRead();
+    await _parseStreamingData(_fileStream!);
+
+    // Load serialized data onto the screen after download and serialization
+    await _loadParsedData();
+  }
+
+  Future<void> _loadParsedData() async {
+    final directory = await getApplicationSupportDirectory();
+    final parsedDataPath = '${directory.path}/parsed_scryfall_data.json';
+    final parsedFile = File(parsedDataPath);
+
+    // Ensure parsed data exists, then load it
+    if (await parsedFile.exists()) {
+      final jsonData = await parsedFile.readAsString();
+      _allCards = List<Map<String, dynamic>>.from(jsonDecode(jsonData));
+      applyFilter(selectedFormat); // Apply any filter if needed
+      progressNotifier.value = "Cards loaded and ready.";
+    }
+  }
+
+  Future<void> _parseStreamingData(Stream<List<int>> fileStream) async {
+    final decoder = utf8.decoder.bind(fileStream).transform(LineSplitter());
+    var isFirstLine = true;
+
+    await for (final line in decoder) {
+      try {
+        if (isFirstLine || line.trim() == ']') {
+          isFirstLine = false;
+          continue;
+        }
+
+        final cardJson = jsonDecode(line.replaceAll(RegExp(r',$'), ''));
+        final parsedCard = _parseCardData(cardJson);
+
+        if (parsedCard != null) {
+          _allCards.add(parsedCard);
+        }
+      } catch (e) {
+        print("Error parsing card: $e");
+        continue;
+      }
+    }
+
+    // Save parsed data to disk for faster loading in the future
+    final directory = await getApplicationSupportDirectory();
+    final parsedDataPath = '${directory.path}/parsed_scryfall_data.json';
+    await _saveParsedData(parsedDataPath);
+    progressNotifier.value = "Cards loaded and serialized successfully.";
+  }
+
   Future<void> initialize() async {
     if (_initialized) return;
 
+    // Locate storage directory
     progressNotifier.value = "Locating storage directory...";
     final directory = await getApplicationSupportDirectory();
     final parsedDataPath = '${directory.path}/parsed_scryfall_data.json';
     final parsedFile = File(parsedDataPath);
 
+    // Check if parsed data exists
     if (await parsedFile.exists()) {
+      // Load parsed data directly without downloading
       progressNotifier.value = "Loading serialized card data...";
       final jsonData = await parsedFile.readAsString();
       _allCards = List<Map<String, dynamic>>.from(jsonDecode(jsonData));
+      applyFilter(selectedFormat);
+      _initialized = true;
     } else {
-      final scryfallPath = '${directory.path}/oracle-cards.json';
-      final scryfallFile = File(scryfallPath);
-
-      if (!await scryfallFile.exists()) {
-        progressNotifier.value = "Data file missing. Downloading...";
-        try {
-          await downloadAndExtractData(progressNotifier);
-        } catch (e) {
-          progressNotifier.value = "Error downloading data: ${e.toString()}";
-          throw Exception("Failed to download Scryfall data: $e");
-        }
-      }
-
-      progressNotifier.value = "Opening JSON file for streaming...";
-      _fileStream = scryfallFile.openRead();
-
-      final decoder = utf8.decoder.bind(_fileStream!).transform(LineSplitter());
-      var isFirstLine = true;
-
-      await for (final line in decoder) {
-        try {
-          if (isFirstLine || line.trim() == ']') {
-            isFirstLine = false;
-            continue;
-          }
-
-          final cardJson = jsonDecode(line.replaceAll(RegExp(r',$'), ''));
-          final parsedCard = _parseCardData(cardJson);
-
-          if (parsedCard != null) {
-            _allCards.add(parsedCard);
-          }
-        } catch (e) {
-          print("Error parsing card: $e");
-          continue;
-        }
-      }
-
-      await _saveParsedData(parsedDataPath);
-      progressNotifier.value = "Cards loaded and serialized successfully.";
+      progressNotifier.value = "Data file(s) missing. Ready for download.";
     }
-
-    applyFilter(selectedFormat);
-    _initialized = true;
   }
 
   Future<void> _saveParsedData(String path) async {

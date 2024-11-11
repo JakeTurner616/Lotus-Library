@@ -45,6 +45,12 @@ dependencies:
       url: https://github.com/google/flutter-desktop-embedding.git
       path: plugins/window_size
       ref: fd519be1e8398c6b6c2062c2447bac960a71bc02
+  flutter_desktop_splash:
+    git:
+      url: https://github.com/JakeTurner616/flutter_desktop_splash.git
+      ref: main
+  loading_indicator: ^3.1.1
+
 
 dev_dependencies:
 
@@ -70,9 +76,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+   - assets/playstore.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
