@@ -129,14 +129,14 @@ class CardSearchDelegate extends SearchDelegate {
       );
     }
 
-    // Screen width-based grid configuration
     return LayoutBuilder(
       builder: (context, constraints) {
         double screenWidth = constraints.maxWidth;
-        double minCardWidth = 220.0; // Minimum width for each card
-        double cardHeight = 465; // Fixed height for cards
+        double minCardWidth = 250.0;
+        double maxCardWidth = 250.0;
+        double cardHeight = 454.0;
 
-        int crossAxisCount = (screenWidth / minCardWidth).floor().clamp(1, 5);
+        int crossAxisCount = (screenWidth / maxCardWidth).floor().clamp(1, 99);
         double cardWidth = screenWidth / crossAxisCount;
         double aspectRatio = cardWidth / cardHeight;
 
@@ -144,13 +144,23 @@ class CardSearchDelegate extends SearchDelegate {
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             childAspectRatio: aspectRatio,
+            crossAxisSpacing: 5.0, // Consistent spacing
+            mainAxisSpacing: 5.0, // Consistent spacing
           ),
           itemCount: results.length,
           itemBuilder: (context, index) {
             final cardData = results[index];
-            return CardWidget(
-              cardData: cardData,
-              cardLoader: cardLoader,
+            return Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: minCardWidth,
+                  maxWidth: maxCardWidth,
+                ),
+                child: CardWidget(
+                  cardData: cardData,
+                  cardLoader: cardLoader,
+                ),
+              ),
             );
           },
         );

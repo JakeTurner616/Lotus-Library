@@ -34,8 +34,6 @@ class _HomeScreenState extends State<HomeScreen> {
     'standard'
   ];
   String selectedFormat = 'commander';
-  static const double cardHeight = 450.0; // Fixed height for cards
-  static const double minCardWidth = 220.0; // Minimum card width
 
   @override
   void initState() {
@@ -122,9 +120,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHomeScreen(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    int crossAxisCount = (screenWidth / minCardWidth)
-        .floor()
-        .clamp(1, 100); // Ensures at least 1 and max 100 columns
+    double minCardWidth = 250.0;
+    double maxCardWidth = 250.0;
+    double cardHeight =
+        454.0; // Matches both CardWidget and SkeletonCard height
+
+    int crossAxisCount = (screenWidth / maxCardWidth).floor().clamp(1, 99);
     double cardWidth = screenWidth / crossAxisCount;
     double aspectRatio = cardWidth / cardHeight;
 
@@ -144,12 +145,12 @@ class _HomeScreenState extends State<HomeScreen> {
         Expanded(
           child: isLoading
               ? GridView.builder(
-                  itemCount: 16,
+                  itemCount: 25,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: crossAxisCount,
                     childAspectRatio: aspectRatio,
-                    crossAxisSpacing: 3.0, // Horizontal space between cards
-                    mainAxisSpacing: 3.0, // Vertical space between cards
+                    crossAxisSpacing: 5.0,
+                    mainAxisSpacing: 5.0,
                   ),
                   itemBuilder: (context, index) => SkeletonCard(),
                 )
@@ -159,13 +160,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: crossAxisCount,
                         childAspectRatio: aspectRatio,
-                        crossAxisSpacing: 3.0, // Horizontal space between cards
-                        mainAxisSpacing: 3.0, // Vertical space between cards
+                        crossAxisSpacing: 5.0,
+                        mainAxisSpacing: 5.0,
                       ),
                       itemCount: displayedCards.length,
-                      itemBuilder: (context, index) => CardWidget(
-                        cardData: displayedCards[index],
-                        cardLoader: cardLoader, // Pass cardLoader here
+                      itemBuilder: (context, index) => Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: minCardWidth,
+                            maxWidth: maxCardWidth,
+                          ),
+                          child: CardWidget(
+                            cardData: displayedCards[index],
+                            cardLoader: cardLoader,
+                          ),
+                        ),
                       ),
                     )
                   : Center(
@@ -257,7 +266,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   .toList(),
             ),
           ),
-          Divider(),
           ListTile(
             leading: Icon(Icons.update),
             title: Text('Check for Data Updates'),

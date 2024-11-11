@@ -10,7 +10,11 @@ class CardWidget extends StatelessWidget {
   final VoidCallback? onDelete;
   final CardLoader cardLoader;
 
-  CardWidget({
+  static const double fixedCardWidth = 250.0;
+  static const double fixedCardHeight = 454.0;
+
+  const CardWidget({
+    super.key,
     required this.cardData,
     required this.cardLoader,
     this.onDelete,
@@ -20,61 +24,74 @@ class CardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final face = cardData['faces'][0];
 
-    return MouseRegion(
-      cursor: Platform.isWindows || Platform.isMacOS || Platform.isLinux
-          ? SystemMouseCursors.click
-          : SystemMouseCursors.basic,
-      child: GestureDetector(
-        onTap: () => _openCardDetail(context),
-        onLongPressStart: (details) =>
-            _showPopupMenu(context, details.globalPosition),
-        child: Card(
-          clipBehavior: Clip.antiAlias,
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CachedNetworkImage(
-                imageUrl: face['imageUri'] ?? '',
-                height: 370,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(color: Colors.grey),
-                errorWidget: (context, url, error) {
-                  debugPrint('Error loading image: $error');
-                  return Icon(Icons.error);
-                },
-              ),
-              Divider(
-                height: 2.0,
-                color: Color.fromARGB(255, 37, 37, 37),
-                thickness: 2.0,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      face['name'] ?? 'No Name',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      face['type_line'] ?? 'No Type',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[400]),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+    return GestureDetector(
+      onTap: () => _openCardDetail(context),
+      onLongPressStart: (details) =>
+          _showPopupMenu(context, details.globalPosition),
+      child: MouseRegion(
+        cursor: Platform.isWindows || Platform.isMacOS || Platform.isLinux
+            ? SystemMouseCursors.click
+            : SystemMouseCursors.basic,
+        child: SizedBox(
+          width: fixedCardWidth,
+          height: fixedCardHeight,
+          child: Card(
+            clipBehavior: Clip.antiAlias,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 370.0, // Fixed height for the image section
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.0),
+                    color: Colors.grey[200],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: CachedNetworkImage(
+                    imageUrl: face['imageUri'] ?? '',
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) =>
+                        Container(color: Colors.grey),
+                    errorWidget: (context, url, error) {
+                      debugPrint('Error loading image: $error');
+                      return Icon(Icons.error);
+                    },
+                  ),
                 ),
-              ),
-            ],
+                Divider(
+                  height: 2.0,
+                  color: Color.fromARGB(255, 37, 37, 37),
+                  thickness: 2.0,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        face['name'] ?? 'No Name',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        face['type_line'] ?? 'No Type',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                        maxLines: 1, // Constrain to a single line
+                        overflow:
+                            TextOverflow.ellipsis, // Use ellipsis if overflow
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -97,11 +114,20 @@ class CardWidget extends StatelessWidget {
   }
 
   void _openCardDetail(BuildContext context) {
-    final face = cardData['faces'][0];
-    final legalities = cardData['legalities'] as Map<String, dynamic>?;
+    final faces = cardData['faces']; // Get the faces of the card
+    final legalities =
+        cardData['legalities'] as Map<String, dynamic>?; // Get the legalities
+    final cardName = cardData['name']; // Card's name for printing
+    final cardType = cardData['type_line']; // Type of the card
 
-    // Fetch related cards using findSynergies
-    final relatedCards = cardLoader.findSynergies(face);
+    // Fetch related cards using findSynergies (assuming 'faces' has at least one face)
+    final relatedCards = cardLoader.findSynergies(faces[0]);
+
+    // Print the data to the console for debugging purposes
+    print('Card Name: $cardName');
+    print('Card Type: $cardType');
+    print('Card Faces: $faces');
+    print('Card Legalities: $legalities');
 
     showDialog(
       context: context,
@@ -117,33 +143,72 @@ class CardWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (face['imageUri'] != null)
-                  CachedNetworkImage(
-                    imageUrl: face['imageUri'],
-                    height: 300,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) =>
-                        Center(child: CircularProgressIndicator()),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    bool isWideLayout = constraints.maxWidth > 600;
+                    return Flex(
+                      direction: isWideLayout ? Axis.horizontal : Axis.vertical,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: faces.map<Widget>((face) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CachedNetworkImage(
+                            imageUrl: face['imageUri'] ?? '',
+                            height: 300,
+                            width: isWideLayout ? 250 : double.infinity,
+                            fit: BoxFit.contain,
+                            placeholder: (context, url) =>
+                                Center(child: CircularProgressIndicator()),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+                SizedBox(height: 16),
+
+                // Display each face's name, type, and oracle text
+                for (var face in faces) ...[
+                  Text(
+                    face['name'] ?? 'No Name',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                SizedBox(height: 16),
-                Text(
-                  face['name'] ?? 'No Name',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  face['type_line'] ?? 'No Type',
-                  style: TextStyle(fontSize: 18, color: Colors.grey[400]),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  face['oracle_text'] ?? 'No Description',
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(height: 16),
+                  Text(
+                    face['type_line'] ?? 'No Type',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[400]),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 8),
+                  // Check for 'card_faces' if the card is a split card
+                  if (face['card_faces'] != null)
+                    for (var subFace in face['card_faces']) ...[
+                      Text(
+                        subFace['name'] ?? 'No Name',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        subFace['type_line'] ?? 'No Type',
+                        style: TextStyle(fontSize: 16, color: Colors.grey[400]),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        subFace['oracle_text'] ?? 'No Description',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 16),
+                    ]
+                  else
+                    Text(
+                      face['oracle_text'] ?? 'No Description',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  SizedBox(height: 16),
+                ],
+
                 Text(
                   'Legalities:',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

@@ -29,6 +29,10 @@ void main() {
 void _initializeDesktopWindow() {
   setWindowTitle(
       "Lotus Library"); // Set the application title on desktop platforms
+  if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    setWindowMinSize(const Size(
+        500, 600)); // Set the minimum width and height (e.g., 500x600)
+  }
 }
 
 /// The root widget of the application.
