@@ -232,17 +232,32 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
     final card = widget.cardLoader.allCardsFiltered.firstWhere(
       (card) =>
           card['faces'][0]['name'].toLowerCase() == cardName.toLowerCase(),
-      orElse: () => {},
+      orElse: () => {}, // Return an empty map if not found
     );
 
+    if (card.isEmpty) {
+      // Show an error message if the card is not found
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Card "$cardName" not found')),
+      );
+      return;
+    }
+
+    // Add the card to the list if it is valid
     setState(() {
       savedListsManager.addCardToList(widget.listName, card);
     });
+
+    // Save the updated lists to disk
     await savedListsManager.saveLists();
     widget.onListUpdated();
+
+    // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Card "$cardName" imported successfully')),
     );
+
+    // Clear the input field
     _cardNameController.clear();
   }
 
