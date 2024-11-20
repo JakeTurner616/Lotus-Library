@@ -146,25 +146,25 @@ class _PowerLevelerScreenState extends State<PowerLevelerScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Power Leveler Info'),
+          title: const Text('Power Leveler Info'),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 RichText(
                   text: TextSpan(
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 16,
-                        color: const Color.fromARGB(255, 255, 255, 255)),
+                        color: Color.fromARGB(255, 255, 255, 255)),
                     children: [
-                      TextSpan(
+                      const TextSpan(
                         text:
                             'The Power Leveler checks your deck’s strength on a scale from 1 to 10. It uses data on how popular and "frustrating" each card is, based on info from EDHREC: ',
                       ),
                       TextSpan(
                         text: 'edhrec.com/top/salt',
-                        style: TextStyle(
-                          color: Colors.blue,
+                        style: const TextStyle(
+                          color: Colors.purpleAccent,
                           decoration: TextDecoration.underline,
                         ),
                         recognizer: TapGestureRecognizer()
@@ -184,83 +184,83 @@ class _PowerLevelerScreenState extends State<PowerLevelerScreen> {
                             }
                           },
                       ),
-                      TextSpan(
+                      const TextSpan(
                         text: '.',
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: 16),
-                Divider(),
-                SizedBox(height: 16),
-                Text(
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 16),
+                const Text(
                   'How it works:',
                   style: TextStyle(fontSize: 16),
                 ),
-                SizedBox(height: 16),
-                Divider(),
-                SizedBox(height: 8),
-                Text(
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 8),
+                const Text(
                   '1. Checking Card Popularity:',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                Text(
+                const Text(
                   '   - Each card is checked to see how often people use it, giving it a "rank score." The more popular the card, the higher the score.',
                 ),
-                Text(
+                const Text(
                   '   - Cards that don’t have a popularity rank are given a score of 0.',
                 ),
-                SizedBox(height: 16),
-                Divider(),
-                SizedBox(height: 8),
-                Text(
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 8),
+                const Text(
                   '2. Checking Card "Saltiness":',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                Text(
+                const Text(
                   '   - Each card’s "saltiness" shows how frustrating or annoying it is to play against. The more annoying, the higher the saltiness score.',
                 ),
-                SizedBox(height: 16),
-                Divider(),
-                SizedBox(height: 8),
-                Text(
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 8),
+                const Text(
                   '3. Combining Scores:',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                Text(
+                const Text(
                   '   - For each card, we combine its popularity and saltiness scores. This gives each card a "strength score" based on how popular and frustrating it is.',
                 ),
-                SizedBox(height: 16),
-                Divider(),
-                SizedBox(height: 8),
-                Text(
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 8),
+                const Text(
                   '4. Adding Up Card Scores:',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                Text(
+                const Text(
                   '   - We multiply each card’s strength score by how many times it appears in your deck. Then, we add up these scores for all the cards in your deck.',
                 ),
-                Text(
+                const Text(
                   '   - We also count the total number of cards in the deck (ignoring basic lands).',
                 ),
-                SizedBox(height: 16),
-                Divider(),
-                SizedBox(height: 8),
-                Text(
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 8),
+                const Text(
                   '5. Final Deck Score:',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                Text(
+                const Text(
                   '   - We adjust the total score to fit on a scale from 1 to 10. If there are no cards, the score is 1.',
                 ),
-                SizedBox(height: 16),
-                Divider(),
-                SizedBox(height: 8),
-                Text(
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 8),
+                const Text(
                   'Result:',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                Text(
+                const Text(
                   '   - Your deck’s final score is shown as a number from 1 to 10, based on the total popularity and saltiness of the cards you included.',
                 ),
               ],
@@ -268,7 +268,7 @@ class _PowerLevelerScreenState extends State<PowerLevelerScreen> {
           ),
           actions: [
             TextButton(
-              child: Text('Got it'),
+              child: const Text('Got it'),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -284,10 +284,10 @@ class _PowerLevelerScreenState extends State<PowerLevelerScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Power Leveler'),
+        title: const Text('Power Leveler'),
         actions: [
           IconButton(
-            icon: Icon(Icons.help_outline),
+            icon: const Icon(Icons.help_outline),
             tooltip: 'Algorithm Info',
             onPressed: showAlgorithmInfo,
           ),
@@ -297,7 +297,7 @@ class _PowerLevelerScreenState extends State<PowerLevelerScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
         child: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 600),
+            constraints: const BoxConstraints(maxWidth: 600),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -322,21 +322,21 @@ class _PowerLevelerScreenState extends State<PowerLevelerScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    contentPadding: EdgeInsets.all(16),
+                    contentPadding: const EdgeInsets.all(16),
                   ),
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 24),
                 // Calculate Button
                 ElevatedButton.icon(
                   onPressed: () => loadAndCalculateScore(debug: true),
-                  icon: Icon(Icons.calculate),
-                  label: Text('Calculate Score'),
+                  icon: const Icon(Icons.calculate),
+                  label: const Text('Calculate Score'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    textStyle: TextStyle(fontSize: 18),
+                    textStyle: const TextStyle(fontSize: 18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

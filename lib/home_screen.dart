@@ -11,6 +11,11 @@ import 'card_search_delegate.dart';
 import 'parse_service.dart';
 
 class HomeScreen extends StatefulWidget {
+  final ValueNotifier<String> progressNotifier;
+
+  const HomeScreen({Key? key, required this.progressNotifier})
+      : super(key: key);
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -18,8 +23,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   late CardLoader cardLoader;
-  final ValueNotifier<String> progressNotifier =
-      ValueNotifier<String>("Starting...");
   final ScrollController scrollController = ScrollController();
   List<Map<String, dynamic>> displayedCards = [];
   bool isLoading = true;
@@ -39,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     cardLoader = CardLoader(
-        progressNotifier: progressNotifier, selectedFormat: 'commander');
+        progressNotifier: widget.progressNotifier, selectedFormat: 'commander');
     _initializeLoader();
     _loadSavedLists();
 
@@ -64,11 +67,11 @@ class _HomeScreenState extends State<HomeScreen> {
         await _loadMoreCards();
       }
     } catch (e) {
-      progressNotifier.value = "Error: ${e.toString()}";
+      widget.progressNotifier.value = "Error: ${e.toString()}";
     } finally {
       setState(() => isLoading = false);
       FlutterNativeSplash.remove();
-      progressNotifier.value = "";
+      widget.progressNotifier.value = "";
     }
   }
 
@@ -105,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    progressNotifier.dispose();
+    widget.progressNotifier.dispose();
     scrollController.dispose();
     super.dispose();
   }
@@ -135,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       children: [
         ValueListenableBuilder<String>(
-          valueListenable: progressNotifier,
+          valueListenable: widget.progressNotifier,
           builder: (context, progress, child) {
             return progress.isNotEmpty
                 ? Padding(
@@ -180,11 +183,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     )
-                  : Center(
+                  : const Center(
                       child: Text("Data is being initialized. Please wait..."),
                     ),
         ),
-        if (isFetchingMore) Center(child: CircularProgressIndicator()),
+        if (isFetchingMore) const Center(child: CircularProgressIndicator()),
       ],
     );
   }
@@ -194,10 +197,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: _selectedIndex == 0
           ? AppBar(
-              title: Text('Home!'),
+              title: const Text('Home!'),
               actions: [
                 IconButton(
-                  icon: Icon(Icons.search),
+                  icon: const Icon(Icons.search),
                   onPressed: () => showSearch(
                     context: context,
                     delegate: CardSearchDelegate(
@@ -213,14 +216,15 @@ class _HomeScreenState extends State<HomeScreen> {
       body: _getSelectedScreen(),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.grey[900],
-        selectedItemColor: Colors.blueAccent,
+        selectedItemColor: Colors.purpleAccent,
         unselectedItemColor: Colors.white,
         currentIndex: _selectedIndex,
         onTap: (index) => setState(() => _selectedIndex = index),
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Saved Lists'),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          const BottomNavigationBarItem(
+              icon: Icon(Icons.list), label: 'Saved Lists'),
+          const BottomNavigationBarItem(
               icon: Icon(Icons.flash_on), label: 'Power Leveler'),
         ],
       ),
@@ -236,15 +240,15 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blueAccent),
+          const DrawerHeader(
+            decoration: BoxDecoration(color: Colors.purpleAccent),
             child: Text(
               'Select Format',
               style: TextStyle(color: Colors.white, fontSize: 24),
             ),
           ),
           ListTile(
-            title: Text('Format Filter'),
+            title: const Text('Format Filter'),
             subtitle: DropdownButton<String>(
               value: selectedFormat,
               onChanged: (String? newValue) {
@@ -261,8 +265,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.update),
-            title: Text('Check for Data Updates'),
+            leading: const Icon(Icons.update),
+            title: const Text('Check for Data Updates'),
             onTap: () {
               Navigator.of(context).pop(); // Close the drawer first
               checkForUpdatesAndPrompt(

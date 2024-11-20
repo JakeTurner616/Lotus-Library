@@ -2,27 +2,39 @@ import 'dart:io'; // Import for platform checking
 import 'package:flutter/material.dart';
 import 'package:flutter_desktop_splash/flutter_desktop_splash.dart'; // Import the custom splash package
 import 'package:flutter_native_splash/flutter_native_splash.dart'; // Import flutter_native_splash for initial splash support
+import 'package:lotus_library/parse_service.dart';
 import 'package:window_size/window_size.dart'; // Import window_size for setting desktop-specific window properties
 import 'package:loading_indicator/loading_indicator.dart'; // Import for custom loading indicators
 import 'home_screen.dart'; // Import the main HomeScreen widget
 
-void main() {
-  // Ensure Flutter bindings are initialized
+void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
-  // Preserve native splash screen until Flutter rendering is ready
+  // Preserve splash screen
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  // Configure window properties only for desktop platforms
-  if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-    _initializeDesktopWindow(); // Set desktop window properties (e.g., title, min/max size)
-  }
+  // Initialize data in the background
+  final progressNotifier = ValueNotifier<String>("Initializing...");
+  await initializeApp(progressNotifier);
 
-  // Remove the native splash screen before showing the custom splash screen
+  // Remove the splash screen
   FlutterNativeSplash.remove();
 
-  // Run the main app widget
-  runApp(MyApp());
+  // Run the main app
+  runApp(MyApp(progressNotifier: progressNotifier));
+}
+
+Future<void> initializeApp(ValueNotifier<String> progressNotifier) async {
+  try {
+    progressNotifier.value = "Setting up environment...";
+    final cardLoader = CardLoader(
+        progressNotifier: progressNotifier, selectedFormat: 'commander');
+    await cardLoader.downloadIfNeeded();
+    await cardLoader.initialize();
+    progressNotifier.value = "Initialization complete.";
+  } catch (e) {
+    progressNotifier.value = "Error during initialization: $e";
+  }
 }
 
 /// Sets up window properties for desktop platforms
@@ -37,19 +49,22 @@ void _initializeDesktopWindow() {
 
 /// The root widget of the application.
 class MyApp extends StatelessWidget {
+  final ValueNotifier<String> progressNotifier;
+
+  const MyApp({Key? key, required this.progressNotifier}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lotus Library', // Title of the app
+      title: 'Lotus Library',
       theme: ThemeData(
-        brightness: Brightness.dark, // Set dark theme for the app
-        primaryColor: Colors.blueAccent,
-        cardColor: Colors.grey[900], // Dark card background color
+        primaryColor: Colors.deepPurple, // Main purple color
+        hintColor: Colors.purpleAccent, // Secondary accent purple
+        brightness: Brightness.dark,
+
+        cardColor: Colors.grey[900],
       ),
-      // Show the splash screen on desktop platforms, or go directly to HomeScreen on others
-      home: Platform.isWindows || Platform.isMacOS || Platform.isLinux
-          ? SplashWrapper() // Wrapper widget for managing splash screen on desktop
-          : HomeScreen(), // Skip splash and show HomeScreen on non-desktop platforms
+      home: SplashWrapper(progressNotifier: progressNotifier),
     );
   }
 }
@@ -57,6 +72,11 @@ class MyApp extends StatelessWidget {
 /// A wrapper widget to display the splash screen on desktop platforms and
 /// navigate to HomeScreen after the splash duration completes.
 class SplashWrapper extends StatefulWidget {
+  final ValueNotifier<String> progressNotifier;
+
+  const SplashWrapper({Key? key, required this.progressNotifier})
+      : super(key: key);
+
   @override
   _SplashWrapperState createState() => _SplashWrapperState();
 }
@@ -72,7 +92,10 @@ class _SplashWrapperState extends State<SplashWrapper> {
         // Wait for the splash duration
         // Navigate to HomeScreen using a replacement to clear splash from the stack
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(
+            builder: (context) =>
+                HomeScreen(progressNotifier: widget.progressNotifier),
+          ),
         );
       });
     });
@@ -88,7 +111,7 @@ class _SplashWrapperState extends State<SplashWrapper> {
         height: 300, // Logo height
       ),
       backgroundColor:
-          Colors.blueAccent, // Background color of the splash screen
+          Colors.purpleAccent, // Background color of the splash screen
       duration:
           Duration(seconds: 5), // Duration for which the splash screen is shown
       onInitializationComplete: () {

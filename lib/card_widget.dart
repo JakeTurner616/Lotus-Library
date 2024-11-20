@@ -228,7 +228,7 @@ class CardWidget extends StatelessWidget {
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text('Close'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
+                      backgroundColor: Colors.purpleAccent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),

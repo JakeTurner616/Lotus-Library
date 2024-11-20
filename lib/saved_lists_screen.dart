@@ -152,7 +152,7 @@ class _SavedListsScreenState extends State<SavedListsScreen> {
         onPressed: _createNewList,
         tooltip: 'Create New List',
         child: Icon(Icons.add),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.purpleAccent,
       ),
     );
   }
@@ -262,7 +262,7 @@ class _ListDetailScreenState extends State<ListDetailScreen> {
   }
 
   double minCardWidth = 220.0; // Minimum width for each card
-  double cardHeight = 465; // Fixed height for cards
+  double cardHeight = 415; // Fixed height for cards
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
