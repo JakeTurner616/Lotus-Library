@@ -143,6 +143,10 @@ class CardLoader {
       }
     }
 
+    // Sort cards by EDHRec rank
+    _allCards.sort(
+        (a, b) => (a['edhrec_rank'] as int).compareTo(b['edhrec_rank'] as int));
+
     // Save parsed data to disk for faster loading in the future
     final directory = await getApplicationSupportDirectory();
     final parsedDataPath = '${directory.path}/parsed_scryfall_data.json';
@@ -212,6 +216,8 @@ class CardLoader {
   Map<String, dynamic>? _parseCardData(Map<String, dynamic> cardJson) {
     final legalities = cardJson['legalities'] as Map<String, dynamic>?;
     final rarity = cardJson['rarity'] as String?;
+    final edhrecRank = cardJson['edhrec_rank'] as int? ??
+        999999; // Default to a very high rank if missing
 
     List<Map<String, dynamic>> cardFaces = [];
     bool isDualSpell = cardJson['image_uris'] != null &&
@@ -252,6 +258,7 @@ class CardLoader {
       'faces': cardFaces,
       'legalities': legalities,
       'rarity': rarity,
+      'edhrec_rank': edhrecRank,
     };
   }
 
