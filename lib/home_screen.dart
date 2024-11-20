@@ -54,6 +54,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initializeLoader() async {
     try {
+      // Ensure data is downloaded if needed
+      await cardLoader.downloadIfNeeded();
+      // Initialize the loader after download
       await cardLoader.initialize();
       if (cardLoader.allCardsFiltered.isNotEmpty) {
         dataAvailable = true;
@@ -178,16 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     )
                   : Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(progressNotifier.value),
-                          ElevatedButton(
-                            onPressed: _startDownload,
-                            child: Text("Download and Initialize Data"),
-                          ),
-                        ],
-                      ),
+                      child: Text("Data is being initialized. Please wait..."),
                     ),
         ),
         if (isFetchingMore) Center(child: CircularProgressIndicator()),

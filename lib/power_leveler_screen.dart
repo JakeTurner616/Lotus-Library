@@ -304,7 +304,7 @@ class _PowerLevelerScreenState extends State<PowerLevelerScreen> {
                 // Status Message
                 Text(
                   statusMessage,
-                  style: Theme.of(context).textTheme.subtitle1?.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: const Color.fromARGB(255, 255, 255, 255),
                         fontSize: 20,
                       ),
@@ -363,7 +363,7 @@ class _PowerLevelerScreenState extends State<PowerLevelerScreen> {
                           'Deck Power Level',
                           style: Theme.of(context)
                               .textTheme
-                              .headline6
+                              .titleLarge
                               ?.copyWith(color: Colors.grey[700]),
                           textAlign: TextAlign.center,
                         ),
